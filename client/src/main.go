@@ -34,7 +34,6 @@ func main() {
 
     fmt.Println("Challenge received:", challenge)
 
-    // Solve the PoW challenge
     nonce := solveChallenge(challenge)
     fmt.Println("Sending nonce:", nonce)
 

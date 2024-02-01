@@ -10,7 +10,14 @@ Design and implement “Word of Wisdom” tcp server.
 
 
 ## How to run
+## Docker compose
 1. Clone the repository
 2. Run `docker-compose up` in the root directory
 3. Run `docker-compose run gwow-client` in the root directory
+4. Follow the instructions in the client container
+
+## without docker
+1. Clone the repository
+2. Run `go run ./server/src/main.go` in the root directory
+3. Run `go run ./client/src/main.go` in the root directory
 4. Follow the instructions in the client container
