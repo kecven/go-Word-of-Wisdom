@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  gwow-server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - gwow-net
+    environment:
+      GWOW-PORT: "8080"
+      GWOW-DIFFICULTY: "6"
+
+  gwow-client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    depends_on:
+      - gwow-server
+    networks:
+      - gwow-net
+    environment:
+      GWOW-SERVER: "gwow-server:8080"
+      GWOW-DIFFICULTY: "6"
+
+networks:
+  gwow-net:
+    driver: bridge
