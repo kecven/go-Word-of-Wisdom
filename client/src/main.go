@@ -1,72 +1,70 @@
 package main
 
 import (
-    "bufio"
-    "crypto/sha256"
-    "encoding/hex"
-    "fmt"
-    "net"
-    "strings"
-	"strconv"
+	"bufio"
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
+	"net"
 	"os"
+	"strconv"
+	"strings"
 )
 
 var (
 	serverAddr = getEnvString("GWOW-SERVER", "localhost:8080")  // TCP server listening address
-	difficulty = getEnvInt("GWOW-DIFFICULTY", 6)                        // Number of leading zeros required in the hash
-	difficultyString = strings.Repeat("0", difficulty)                  // String of leading zeros (e.g. "000000")
+	difficulty = getEnvInt("GWOW-DIFFICULTY", 6)                // Number of leading zeros required in the hash
+	difficultyString = strings.Repeat("0", difficulty)          // String of leading zeros (e.g. "000000")
 )
 
 func main() {
-    conn, err := net.Dial("tcp", serverAddr)
-    if err != nil {
-        panic(err)
-    }
-    defer conn.Close()
-    fmt.Println("Connected to server")
+	conn, err := net.Dial("tcp", serverAddr)
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
+	fmt.Println("Connected to server")
 
-    // Read challenge from server
-    challenge, err := bufio.NewReader(conn).ReadString('\n')
-    if err != nil {
-        panic(err)
-    }
-    challenge = strings.TrimSpace(challenge)
+	// Read challenge from server
+	challenge, err := bufio.NewReader(conn).ReadString('\n')
+	if err != nil {
+		panic(err)
+	}
+	challenge = strings.TrimSpace(challenge)
 
-    fmt.Println("Challenge received:", challenge)
+	fmt.Println("Challenge received:", challenge)
 
-    nonce := solveChallenge(challenge)
-    fmt.Println("Sending nonce:", nonce)
+	nonce := solveChallenge(challenge)
+	fmt.Println("Sending nonce:", nonce)
 
-    // Send nonce back to server
-    _, err = conn.Write([]byte(nonce + "\n"))
+	// Send nonce back to server
+	_, err = conn.Write([]byte(nonce + "\n"))
 
-    if err != nil {
-        panic(err)
-    }
+	if err != nil {
+		panic(err)
+	}
 
-    // Wait for and print the quote
-    quote, err := bufio.NewReader(conn).ReadString('\n')
-    if err != nil {
-        panic(err)
-    }
+	// Wait for and print the quote
+	quote, err := bufio.NewReader(conn).ReadString('\n')
+	if err != nil {
+		panic(err)
+	}
 
-    fmt.Println("Quote received:", quote)
+	fmt.Println("Quote received:", quote)
 }
 
 func solveChallenge(challenge string) string {
-    var nonce int64
-    for {
-        // Concatenate the challenge and nonce
-        attempt := fmt.Sprintf("%s%d", challenge, nonce)
-        hash := sha256.Sum256([]byte(attempt))
-        hexHash := hex.EncodeToString(hash[:])
+	var nonce int64
+	for {
+		attempt := fmt.Sprintf("%s%d", challenge, nonce)
+		hash := sha256.Sum256([]byte(attempt))
+		hexHash := hex.EncodeToString(hash[:])
 
-        // Check if the hash meets the difficulty requirement
-        if hexHash[:difficulty] == difficultyString {
-            return fmt.Sprintf("%d", nonce)
-        }
-        nonce++
-    }
+		if hexHash[:difficulty] == difficultyString {
+			return fmt.Sprintf("%d", nonce)
+		}
+		nonce++
+	}
 }
 
 func getEnvString(key, defaultValue string) string {
@@ -91,4 +89,3 @@ func getEnvInt(key string, defaultValue int) int {
 
 	return int(result)
 }
-
